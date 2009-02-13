@@ -1,16 +1,14 @@
 require File.dirname(__FILE__) + "/../lib/microtest.rb"
+require "/Users/macbook/Projekte/matchy/lib/matchy.rb"
 
-testing "a variable with a value of 1" do
-  @var = 1
-  testing "is 1" do
-    assert @var == 1
-  end
-  testing "one added and it is 2" do
-    @var += 1
-    assert @var == 2
-  end
-  # @var has not been changed!
-  assert @var == 1
+require File.dirname(__FILE__) + "/../lib/microtest.rb"
+
+testing "Some bogus expectations" do
+  nil.should be_nil
+  1.should be(1)
+  1.should_not <= 0
+  var = 5
+  lambda {var += 1}.should change {var}.from(5).to(6)
 end
 
 
@@ -20,7 +18,7 @@ def m
 end
 
 testing "sees method" do
-  assert m == "m"
+  m.should == "m"
 end
 
 testing "introduce method" do
@@ -33,13 +31,13 @@ end
 raise if defined?(m2)
 
 testing "methods introduced in other test block are not present" do
-  assert !defined?(m2)
+  defined?(m2).should be_nil
 end
 
 # Transactional behavior: Instance Variables
 @var1 = 1
 testing "sees instance variables" do
-  assert @var1 == 1
+  @var1.should eql(1)
 end
 
 testing "introduce instance variable" do
@@ -50,7 +48,7 @@ end
 raise if defined?(@var2)
 
 testing "instance variables introduced in other test block are not present" do
-  assert !defined?(@var2)
+  defined?(@var2).should be_nil
 end
 
 testing "change instance variable" do
@@ -60,13 +58,13 @@ end
 raise if @var1 != 1
 
 testing "value of nstance variable remains the same in other testing block" do
-  assert @var1 == 1
+  @var1.should eql(1)
 end
 
 # Transactional behavior: Constants
 M = 1
 testing "sees constants" do
-  assert M == 1
+  M.should == 1
 end
 
 testing "introduce constants" do
@@ -77,7 +75,7 @@ end
 raise if defined?(M2)
 
 testing "constants introduced in other test block are not present" do
-  assert !defined?(M2)
+  defined?(M2).should be_nil
 end
 
 # Transactional behavior: Locals
@@ -98,7 +96,7 @@ raise if defined?(local)
 end.new
 
 testing "Changing objects attribute" do
-  assert @obj.var == 1
+  @obj.var.should == 1
   @obj.var = 2
 end
 
@@ -106,15 +104,18 @@ end
 raise if @obj.var != 1
 
 testing "Objects attribute should not be changed subsequent test block" do
-  assert @obj.var == 1
+  @obj.var.should == 1
 end
 
 # Nesting: Just all the tests from above in the context of a 
 # testing block
 testing "with nesting" do
-  
-  testing "Assert True" do
-    assert true
+  testing "Some bogus expectations" do
+    nil.should be_nil
+    1.should be(1)
+    1.should_not <= 0
+    var = 5
+    lambda {var += 1}.should change {var}.from(5).to(6)
   end
 
 
@@ -124,7 +125,7 @@ testing "with nesting" do
   end
 
   testing "sees method" do
-    assert m == "m"
+    m.should == "m"
   end
 
   testing "introduce method" do
@@ -137,13 +138,13 @@ testing "with nesting" do
   raise if defined?(m2)
 
   testing "methods introduced in other test block are not present" do
-    assert !defined?(m2)
+    defined?(m2).should be_nil
   end
 
   # Transactional behavior: Instance Variables
   @var1 = 1
   testing "sees instance variables" do
-    assert @var1 == 1
+    @var1.should eql(1)
   end
 
   testing "introduce instance variable" do
@@ -154,7 +155,7 @@ testing "with nesting" do
   raise if defined?(@var2)
 
   testing "instance variables introduced in other test block are not present" do
-    assert !defined?(@var2)
+    defined?(@var2).should be_nil
   end
   
   testing "change instance variable" do
@@ -164,13 +165,13 @@ testing "with nesting" do
   raise if @var1 != 1
 
   testing "value of nstance variable remains the same in other testing block" do
-    assert @var1 == 1
+    @var1.should eql(1)
   end
 
   # Transactional behavior: Constants
   M = 1
   testing "sees constants" do
-    assert M == 1
+    M.should == 1
   end
 
   testing "introduce constants" do
@@ -181,7 +182,7 @@ testing "with nesting" do
   raise if defined?(M2)
 
   testing "constants introduced in other test block are not present" do
-    assert !defined?(M2)
+    defined?(M2).should be_nil
   end
 
   # Transactional behavior: Locals
@@ -202,7 +203,7 @@ testing "with nesting" do
   end.new
 
   testing "Changing objects attribute" do
-    assert @obj.var == 1
+    @obj.var.should == 1
     @obj.var = 2
   end
 
@@ -210,7 +211,7 @@ testing "with nesting" do
   raise if @obj.var != 1
 
   testing "Objects attribute should not be changed subsequent test block" do
-    assert @obj.var == 1
+    @obj.var.should == 1
   end
   
 end
