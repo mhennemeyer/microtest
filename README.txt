@@ -5,16 +5,29 @@
 == DESCRIPTION:
 
 MicroTest is a minimal testing framework.
-It works transactional - no need for
-setup/teardown.
+It works transactional without setup and teardown.
+It goes great together with matchy.
+It lets you explicitly set the current self object 
+for a testing block.
 
-It comes in handy if want to write tests
-against testing frameworks.
-
-MicroTest is inspired by this:
+MicroTest is partially inspired by this Blog Post:
 http://pragdave.blogs.pragprog.com/pragdave/2008/03/playing-with-a.html
 
-== FEATURES/PROBLEMS:
+== FEATURES:
+
+MicroTest works with testing blocks. 
+
+Each testing block sets up a context in which assertions 
+can be made. The context will be cleaned up after the testing block ends.
+And the context will be passed into nested testing blocks.
+
+
+You can explicitly set the current self object for a testing block.
+
+
+=== Transactional:  
+Methods, instancevariables and constants are all taken from outer to inner blocks -
+but all that is done to them in the inner block will not persist after the inner block ends.
 
 It works with matchy, so you can use familiar obj.should matcher syntax.
 
@@ -22,6 +35,9 @@ It works with matchy, so you can use familiar obj.should matcher syntax.
 == SYNOPSIS:
 
 	1. plain microtest without matchy
+	
+	require "rubygems"
+	require "microtest"
 	
   testing "a variable with a value of 1" do
     @var = 1
@@ -39,7 +55,10 @@ It works with matchy, so you can use familiar obj.should matcher syntax.
 
   2. with matchy
 
-  require 'matchy'
+  
+  require "rubygems"
+	require "microtest"
+	require "matchy"
 
   testing "with nesting" do
 	  testing "Some bogus expectations" do

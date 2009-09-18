@@ -1,14 +1,16 @@
 require File.dirname(__FILE__) + "/../lib/microtest.rb"
-require "/Users/macbook/Projekte/matchy/lib/matchy.rb"
+require "~/Projekte/matchy/lib/matchy.rb"
 
-require File.dirname(__FILE__) + "/../lib/microtest.rb"
-
-testing "Some bogus expectations" do
+testing "Some expectations" do
   nil.should be_nil
   1.should be(1)
   1.should_not <= 0
   var = 5
   lambda {var += 1}.should change {var}.from(5).to(6)
+  testing "nested" do
+    var = 1
+    lambda {var += 1}.should change {var}.by(1)
+  end
 end
 
 
@@ -169,9 +171,9 @@ testing "with nesting" do
   end
 
   # Transactional behavior: Constants
-  M = 1
+  MN = 1
   testing "sees constants" do
-    M.should == 1
+    MN.should == 1
   end
 
   testing "introduce constants" do

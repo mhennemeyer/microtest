@@ -1,5 +1,17 @@
 module MicroTest
   VERSION = '1.0.0'
+  module Assertions
+    def flunk(msg=nil)
+      file, line = caller(2)[0].split(/:/, 2)
+      raise AssertionFailed.new(msg || (line + ":" + File.readlines(file)[line.to_i-1]))
+    end
+    def assert(bool=false)
+      Gatherer.instance.add_assertion
+      file, line = caller(1)[0].split(/:/, 2)
+      raise AssertionFailed.new(line + ":" + File.readlines(file)[line.to_i-1]) unless !!bool
+      true
+    end
+  end
   class TestingContext < Object;end
   class AssertionFailed < StandardError;end
   class Gatherer
@@ -22,7 +34,7 @@ module MicroTest
     end
   end
 
-  def self.test(context, name, &block)
+  def self.test(context, name, options={}, &block)
     Gatherer.instance.add_test
     failure = false
     orig_block = block
@@ -39,16 +51,7 @@ module MicroTest
     end
     
     block = lambda do
-      def flunk(msg=nil)
-        file, line = caller(2)[0].split(/:/, 2)
-        raise AssertionFailed.new(msg || (line + ":" + File.readlines(file)[line.to_i-1]))
-      end
-      def assert(bool=false)
-        Gatherer.instance.add_assertion
-        file, line = caller(1)[0].split(/:/, 2)
-        raise AssertionFailed.new(line + ":" + File.readlines(file)[line.to_i-1]) unless !!bool
-        true
-      end
+      extend Assertions
 
       ivs.each do |iv, value|
         instance_variable_set(iv, value)
@@ -59,10 +62,15 @@ module MicroTest
     end
     
     ccts = context.class.constants
+    cccts = context.class.class.constants
     scts = (class<<context;self;end).constants
 
     begin
-      TestingContext.new.instance_eval(&block)
+      if s = options[:self]
+        s.instance_eval(&block)
+      else
+        TestingContext.new.instance_eval(&block)
+      end
     rescue Exception => e
       failure = true
       e.class == AssertionFailed ? Gatherer.instance.add_failure : Gatherer.instance.add_error
@@ -73,12 +81,32 @@ module MicroTest
       ----------------------
       """
     end
+    
+    (context.class.constants - ccts).each do |c|
+      context.class.const_defined?(c) && context.class.send(:remove_const, c)
+      Class.const_defined?(c) && Class.send(:remove_const, c)
+      Object.const_defined?(c) && Object.send(:remove_const, c)
+    end
+    (context.class.class.constants - cccts).each do |c|
+      context.class.class.const_defined?(c) && context.class.class.send(:remove_const, c)
+      Class.const_defined?(c) && Class.send(:remove_const, c)
+      Object.const_defined?(c) && Object.send(:remove_const, c)
+    end
+    ((class<<context;self;end).constants - scts).each do |c|
+      (class<<context;self;end).send(:remove_const, c) 
+    end
+    
     $stderr << "." unless failure
+  end
+  
+  def self.config(&block)
+    config = Config.new
   end
 end
 
 module Kernel
-  def testing(name, &block)
-    MicroTest.test(self, name, &block)
+  def testing(name, options={},  &block)
+    MicroTest.test(self, name,options, &block)
   end
+  alias context testing
 end
